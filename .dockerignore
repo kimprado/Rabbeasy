@@ -1,0 +1,9 @@
+*~
+*.bin
+*.md
+*.sh
+.git/
+.gitignore
+.tmp-configure/
+.vscode/
+deployments/

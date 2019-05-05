@@ -1,0 +1,10 @@
+version: '3'
+services:
+  rabbit:
+    build: 
+      context: '${PWD}/deployments/services/rabbit'
+    container_name: 'rabbit-integration'
+    hostname: rabbithost
+    ports: 
+      - 5673:5672
+      - 15673:15672

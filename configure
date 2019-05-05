@@ -1,0 +1,105 @@
+#!/bin/bash
+
+set -e
+
+CURDIR=`pwd`
+DIR=".tmp-configure"
+DOCKER_GROUP="docker"
+GO_PKG="go1.12.4.linux-amd64.tar.gz"
+GO_ROOT="/usr/local/go"
+
+if [ "$USER" == "root" ]; then
+    echo "Aborting: can't use root"
+    exit 1
+fi
+
+if  [ ! -e "./.vscode/settings.json" ]; then
+    cp "./.vscode/settings-sample.json" "./.vscode/settings.json"
+fi
+
+
+OS_DEBIAN="/etc/debian_version"
+
+if [ -e "$OS_DEBIAN" ]; then
+    sudo apt-get -y install \
+                    curl \
+                    git gitk git-gui
+fi
+
+if [ ! -d "$PWD/$DIR" ]; then
+    echo "Creating folder $PWD/$DIR"
+    mkdir -p "$PWD/$DIR"
+fi
+
+cd $DIR
+
+PATH_COMPOSER=`whereis -b docker-compose | awk -F": " '{ print $2 }'`
+if [ "$PATH_COMPOSER" == "" ] && [ ! -e "$PATH_COMPOSER" ]; then
+    echo "Donwloading docker-compose"
+    curl -L "https://github.com/docker/compose/releases/download/1.23.2/docker-compose-$(uname -s)-$(uname -m)" -o ./docker-compose
+    sudo chmod +x ./docker-compose
+    sudo cp ./docker-compose /usr/local/bin/
+else
+    echo "Existing Composer: $PATH_COMPOSER ... OK"
+fi
+
+PATH_DOCKER=`whereis -b dockerd | awk -F": " '{ print $2 }'`
+if [ "$PATH_DOCKER" == "" ] && [ ! -e "$PATH_DOCKER" ]; then
+    echo "Donwloading docker"
+    curl -L "https://download.docker.com/linux/static/stable/$(uname -m)/docker-18.09.2.tgz" -o ./docker-18.09.2.tgz
+    tar zxvf ./docker-18.09.2.tgz
+    sudo cp ./docker/* /usr/local/bin/
+else
+    echo "Existing Docker: $PATH_DOCKER ... OK"
+fi
+
+case "$(getent group $DOCKER_GROUP | awk -F' ' '{ print $1 }'  | wc -w)" in
+0)  echo "Creating $DOCKER_GROUP group ..."
+    sudo /usr/sbin/groupadd $DOCKER_GROUP
+    echo "$DOCKER_GROUP group ... OK"
+    ;;
+1)  echo "$DOCKER_GROUP group exists ... OK"
+    ;;
+esac
+
+sudo /usr/sbin/usermod -a -G $DOCKER_GROUP $USER
+echo "user $USER added in $DOCKER_GROUP group ... OK"
+
+case "$(pidof dockerd | wc -w)" in
+0)  echo "Starting Docker ..."
+    sudo dockerd &
+    # sudo /etc/rc.d/rc.docker start
+    echo "Docker running pid: $(pidof dockerd) ... OK"
+    ;;
+1)  echo "Docker running pid: $(pidof dockerd) ... OK"
+    ;;
+esac
+
+PATH_GO=`whereis -b go | awk -F": " '{ print $2 }'`
+if [ "$PATH_GO" == "" ] && [ ! -e "$PATH_GO" ]; then
+
+    if  [ -d "$GO_ROOT" -o -e "$GO_ROOT" ]; then
+        sudo rm -rf "$GO_ROOT""_bkp_old"
+        sudo mv "$GO_ROOT" "$GO_ROOT""_bkp_old"
+    fi
+
+    if  [ ! -d "$GO_ROOT" ]; then
+        echo "Creating GOROOT dir $GO_ROOT"
+        sudo mkdir "$GO_ROOT"
+    fi
+
+    echo "Donwloading Go"
+    curl -L "https://dl.google.com/go/$GO_PKG" -o "./$GO_PKG"
+    sudo tar zxvf "./$GO_PKG" --strip-components=1 -C "$GO_ROOT"
+
+    if  [ ! -e "$HOME/.profile" ]; then
+        touch "$HOME/.profile"
+    fi
+    echo -e "\nexport GOPATH=\$HOME/go\nexport PATH=\$PATH:$GO_ROOT/bin:\$GOPATH/bin" >> "$HOME/.profile"
+    source "$HOME/.profile"
+
+else
+    echo "Existing `whereis -b go` ... OK"
+fi
+
+cd $CURDIR

@@ -1,0 +1,25 @@
+version: '3'
+networks: 
+  tests:
+services:
+  rabbit:
+    build: 
+      context: '${PWD}/deployments/services/rabbit'
+    container_name: 'rabbit-tests'
+    hostname: rabbithost
+    ports: 
+      - 5672
+      - 15672
+    networks: 
+      - tests
+  rabbeasy:
+    build: 
+      context: '${PWD}/'
+    container_name: 'rabbeasy-tests'
+    hostname: rabbeasyhost
+    env_file:
+    - ./tests-config.env
+    networks: 
+      - tests
+    depends_on:
+      - rabbit
