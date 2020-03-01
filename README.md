@@ -6,7 +6,7 @@ Achieves this goal by encourage the use of provided interfaces.
 While your own code base depends on interfaces its more easy to test with mock.
 
 
-[![Build Status](https://dev.azure.com/kimprado21/Rabbeasy-test-go/_apis/build/status/kimprado.rabbeasy?branchName=azure-pipelines-build-go)](https://dev.azure.com/kimprado21/Rabbeasy-test-go/_build/latest?definitionId=2&branchName=azure-pipelines-build-go)
+[![Build Status](https://dev.azure.com/kimprado21/Rabbeasy/_apis/build/status/rabbeasy?branchName=master)](https://dev.azure.com/kimprado21/Rabbeasy/_build/latest?definitionId=1&branchName=master)
 
 
 ## Installing
