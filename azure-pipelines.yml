@@ -15,16 +15,10 @@ steps:
     version: '1.13.5'
 
 - script: |
-    echo $PATH
-    go version
-    go env
-    echo
-    ls -lah  /home/vsts/go/bin
     go get github.com/jstemmer/go-junit-report
     go get github.com/axw/gocov/gocov
     go get github.com/AlekSi/gocov-xml
     go get -u github.com/matm/gocov-html
-    ls -lah  /home/vsts/go/bin
   workingDirectory: '$(System.DefaultWorkingDirectory)'
   displayName: 'Install deps'
 
@@ -36,7 +30,6 @@ steps:
   displayName: 'Run tests'
 
 - script: |
-    ls -lah
     export PATH=$PATH:/home/vsts/go/bin
     cd ./test-results/
     cat test.out | go-junit-report  > report.xml
@@ -51,9 +44,11 @@ steps:
   inputs:
     testRunner: JUnit
     testResultsFiles: $(System.DefaultWorkingDirectory)/**/report.xml
+  displayName: 'Publish Test'
 
 - task: PublishCodeCoverageResults@1
   inputs:
     codeCoverageTool: Cobertura 
     summaryFileLocation: $(System.DefaultWorkingDirectory)/**/test-results/coverage.xml
     reportDirectory: $(System.DefaultWorkingDirectory)/**/test-results/coverage
+  displayName: 'Publish Code Coverage'
