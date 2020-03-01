@@ -5,6 +5,10 @@ Package rabbeasy is an AMQP wrapper that makes your code more easy to test.
 Achieves this goal by encourage the use of provided interfaces.
 While your own code base depends on interfaces its more easy to test with mock.
 
+
+[![Build Status](https://dev.azure.com/kimprado21/Rabbeasy/_apis/build/status/rabbeasy?branchName=master)](https://dev.azure.com/kimprado21/Rabbeasy/_build/latest?definitionId=1&branchName=master)
+
+
 ## Installing
 
 Install Rabbeasy by running:
