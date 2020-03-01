@@ -5,4 +5,4 @@ COPY . /src
 
 WORKDIR /src/
 ENTRYPOINT [ "make" ]
-CMD [ "test-all" ]
+CMD [ "test-all-file-results" ]
