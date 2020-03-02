@@ -35,3 +35,6 @@ compose-test:
 	@sleep 3
 	@docker-compose -f deployments/docker-compose/tests/docker-compose.yml logs -f rabbeasy
 	@docker-compose -f deployments/docker-compose/tests/docker-compose.yml down -v
+
+compose-test-down:
+	@docker-compose -f deployments/docker-compose/tests/docker-compose.yml down -v
