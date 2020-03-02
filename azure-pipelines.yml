@@ -7,14 +7,48 @@ trigger:
  - master
 
 pool:
-   vmImage: 'ubuntu-latest'
+   vmImage: 'ubuntu-18.04'
 
 steps: 
 - task: GoTool@0
   inputs:
     version: '1.13.5'
-- task: Go@0
+
+- script: |
+    go get github.com/jstemmer/go-junit-report
+    go get github.com/axw/gocov/gocov
+    go get github.com/AlekSi/gocov-xml
+    go get -u github.com/matm/gocov-html
+  workingDirectory: '$(System.DefaultWorkingDirectory)'
+  displayName: 'Install deps'
+
+- script: |
+    mkdir test-results
+    chown vsts:docker test-results
+    time make compose-test
+  workingDirectory: '$(System.DefaultWorkingDirectory)'
+  displayName: 'Run tests'
+
+- script: |
+    export PATH=$PATH:/home/vsts/go/bin
+    cd ./test-results/
+    cat test.out | go-junit-report  > report.xml
+    gocov convert coverage.txt > coverage.json
+    gocov-xml < coverage.json > coverage.xml
+    mkdir coverage
+    gocov-html < coverage.json > coverage/index.html
+  workingDirectory: '$(System.DefaultWorkingDirectory)'
+  displayName: 'Convert test outputs'
+
+- task: PublishTestResults@2
   inputs:
-    command: 'test'
-    arguments: '-v ./... -tags="unit" -cover'
-    workingDirectory: '$(System.DefaultWorkingDirectory)'
+    testRunner: JUnit
+    testResultsFiles: $(System.DefaultWorkingDirectory)/**/report.xml
+  displayName: 'Publish Test'
+
+- task: PublishCodeCoverageResults@1
+  inputs:
+    codeCoverageTool: Cobertura 
+    summaryFileLocation: $(System.DefaultWorkingDirectory)/**/test-results/coverage.xml
+    reportDirectory: $(System.DefaultWorkingDirectory)/**/test-results/coverage
+  displayName: 'Publish Code Coverage'

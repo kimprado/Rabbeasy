@@ -13,6 +13,11 @@ test-example:
 test-all:
 	@go test -parallel 10 -timeout 1m30s -v ./... -tags="test" -cover
 
+test-all-file-results:
+	@touch ./test-results/test.out
+	@tail -f ./test-results/test.out &
+	@go test -parallel 10 -timeout 5m0s -v ./... -tags="test" -coverprofile=./test-results/coverage.txt -covermode count > ./test-results/test.out
+
 compose: compose-infra-down compose-infra
 
 compose-infra:

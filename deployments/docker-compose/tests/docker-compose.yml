@@ -19,6 +19,8 @@ services:
     hostname: rabbeasyhost
     env_file:
     - ./tests-config.env
+    volumes:
+      - ./../../../test-results:/src/test-results
     networks: 
       - tests
     depends_on:
